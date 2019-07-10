@@ -679,7 +679,7 @@ open class Chart: UIControl {
 
     // MARK: - Touch events
 
-    fileprivate func drawHighlightLineFromLeftPosition(_ left: CGFloat) {
+    public func drawHighlightLineFromLeftPosition(_ left: CGFloat) {
         if let shapeLayer = highlightShapeLayer {
             // Use line already created
             let path = CGMutablePath()
