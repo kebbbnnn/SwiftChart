@@ -205,6 +205,13 @@ open class Chart: UIControl {
     */
     open var hideHighlightLineOnTouchEnd = false
 
+    public struct ChartAnimation {
+      public var enabled: Bool = true
+      public var duration: CFTimeInterval = 1
+    }
+  
+    public var animation: ChartAnimation = ChartAnimation()
+  
     /**
     Alpha component for the area color.
     */
@@ -487,6 +494,15 @@ open class Chart: UIControl {
         self.layer.addSublayer(lineLayer)
 
         layerStore.append(lineLayer)
+      
+        // animate line drawing
+        if animation.enabled {
+          let animateStrokeEnd = CABasicAnimation(keyPath: "strokeEnd")
+          animateStrokeEnd.duration = animation.duration
+          animateStrokeEnd.fromValue = 0
+          animateStrokeEnd.toValue = 1
+          lineLayer.add(animateStrokeEnd, forKey: "strokeEnd")
+        }
     }
 
     fileprivate func drawArea(_ xValues: [Double], yValues: [Double], seriesIndex: Int) {
@@ -514,6 +530,15 @@ open class Chart: UIControl {
         self.layer.addSublayer(areaLayer)
 
         layerStore.append(areaLayer)
+      
+        // animate the opacity of the poinst
+        if animation.enabled {
+          let animateOpacity = CABasicAnimation(keyPath: "opacity")
+          animateOpacity.duration = animation.duration
+          animateOpacity.fromValue = 0
+          animateOpacity.toValue = 1
+          areaLayer.add(animateOpacity, forKey: "opacity")
+        }
     }
 
     fileprivate func drawAxes() {
