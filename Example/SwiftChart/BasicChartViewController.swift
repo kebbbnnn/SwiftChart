@@ -94,7 +94,33 @@ class BasicChartViewController: UIViewController, ChartDelegate {
         }
     }
     
-    // Chart delegate
+  @IBAction func onAddDataTapped(_ sender: UIBarButtonItem) {
+    guard selectedChart == 0 else { return }
+    
+    if let chart = self.chart {
+      let lastSeries = chart.series.last
+      let lastPoint: (x: Double, y: Double) = (lastSeries?.data.last)!
+      let newPoint: (x: Double, y: Double) = (x: lastPoint.x + 1, y: Double.random(in: 0..<3))
+      let series = ChartSeries(data: [lastPoint, newPoint])
+      series.area = true
+      self.chart.add(series)
+      DispatchQueue.main.async { [unowned self] in
+        self.chart.setNeedsDisplay()
+      }
+    }
+  }
+  
+  @IBAction func onRemoveDataTapped(_ sender: UIBarButtonItem) {
+    guard selectedChart == 0 else { return }
+    
+    if let chart = self.chart {
+      self.chart.series.removeLast()
+      DispatchQueue.main.async { [unowned self] in
+        self.chart.setNeedsDisplay()
+      }
+    }
+  }
+  // Chart delegate
     
     func didTouchChart(_ chart: Chart, indexes: Array<Int?>, x: Double, left: CGFloat) {
         for (seriesIndex, dataIndex) in indexes.enumerated() {

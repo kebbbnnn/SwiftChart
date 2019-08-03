@@ -10,7 +10,22 @@ import UIKit
 /**
 The `ChartSeries` class create a chart series and configure its appearance and behavior.
 */
-open class ChartSeries {
+open class ChartSeries: Hashable {
+  
+    public static func == (lhs: ChartSeries, rhs: ChartSeries) -> Bool {
+      return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+    }
+  
+    public var hashValue: Int {
+      var hasher = Hasher()
+      hash(into: &hasher)
+      return hasher.finalize()
+    }
+  
+    public func hash(into hasher: inout Hasher) {
+      hasher.combine(ObjectIdentifier(self))
+    }
+  
     /**
     The data used for the chart series.
     */

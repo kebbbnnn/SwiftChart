@@ -332,10 +332,13 @@ open class Chart: UIControl {
         for view in self.subviews {
             view.removeFromSuperview()
         }
-        for layer in layerStore {
-            layer.removeFromSuperlayer()
-        }
-        layerStore.removeAll()
+      
+        removeDefunctLineLayers()
+
+//        for layer in layerStore {
+//            layer.removeFromSuperlayer()
+//        }
+//        layerStore.removeAll()
 
         // Draw content
 
@@ -348,11 +351,13 @@ open class Chart: UIControl {
                 let scaledXValues = scaleValuesOnXAxis( segment.map { $0.x } )
                 let scaledYValues = scaleValuesOnYAxis( segment.map { $0.y } )
 
+                let tag: String = String(series.hashValue)
+              
                 if series.line {
-                    drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index)
+                    drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
                 }
                 if series.area {
-                    drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index)
+                    drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
                 }
             })
         }
@@ -368,6 +373,41 @@ open class Chart: UIControl {
 
     }
 
+    // MARK: - Removes series line that are no longer existing
+
+    fileprivate func removeDefunctLineLayers() {
+      
+      for layer in layerStore {
+        if let tag: String = layer.name {
+          let obj = self.series.first(where: { String($0.hashValue) == tag })
+          if obj == nil {
+            // animate series removal
+            if animation.enabled {
+              
+              CATransaction.begin()
+              
+              let animateStrokeEnd = CABasicAnimation(keyPath: "strokeEnd")
+              animateStrokeEnd.duration = animation.duration
+              animateStrokeEnd.fromValue = 1
+              animateStrokeEnd.toValue = 0
+              
+              CATransaction.setCompletionBlock {
+                layer.removeFromSuperlayer()
+              }
+              
+              layer.add(animateStrokeEnd, forKey: "strokeEnd")
+              
+              CATransaction.commit()
+              
+            } else {
+              layer.removeFromSuperlayer()
+            }
+          }
+        }
+      }
+      
+    }
+  
     // MARK: - Scaling
 
     fileprivate func getMinMax() -> (min: ChartPoint, max: ChartPoint) {
@@ -468,7 +508,7 @@ open class Chart: UIControl {
 
     // MARK: - Drawings
 
-    fileprivate func drawLine(_ xValues: [Double], yValues: [Double], seriesIndex: Int) {
+  fileprivate func drawLine(_ xValues: [Double], yValues: [Double], seriesIndex: Int, tag: String) {
         // YValues are "reverted" from top to bottom, so 'above' means <= level
         let isAboveZeroLine = yValues.max()! <= self.scaleValueOnYAxis(series[seriesIndex].colors.zeroLevel)
         let path = CGMutablePath()
@@ -479,6 +519,7 @@ open class Chart: UIControl {
         }
 
         let lineLayer = CAShapeLayer()
+        lineLayer.name = tag
         lineLayer.frame = self.bounds
         lineLayer.path = path
 
@@ -505,7 +546,7 @@ open class Chart: UIControl {
         }
     }
 
-    fileprivate func drawArea(_ xValues: [Double], yValues: [Double], seriesIndex: Int) {
+    fileprivate func drawArea(_ xValues: [Double], yValues: [Double], seriesIndex: Int, tag: String) {
         // YValues are "reverted" from top to bottom, so 'above' means <= level
         let isAboveZeroLine = yValues.max()! <= self.scaleValueOnYAxis(series[seriesIndex].colors.zeroLevel)
         let area = CGMutablePath()
@@ -517,6 +558,7 @@ open class Chart: UIControl {
         }
         area.addLine(to: CGPoint(x: CGFloat(xValues.last!), y: zero))
         let areaLayer = CAShapeLayer()
+        areaLayer.name = tag
         areaLayer.frame = self.bounds
         areaLayer.path = area
         areaLayer.strokeColor = nil
