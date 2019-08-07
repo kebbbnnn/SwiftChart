@@ -16,6 +16,7 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		E8B0D660A46EF06FABD767C8 /* Pods_SwiftChart_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC7CAF090F76E359EA48CF70 /* Pods_SwiftChart_Example.framework */; };
+		FA8A6ECB22F9CA230044EE6E /* Chart+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA8A6ECA22F9CA230044EE6E /* Chart+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,7 +26,7 @@
 		2408E4781C1B8F6A00A7B359 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		2408E47B1C1B935500A7B359 /* StockChartViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StockChartViewController.swift; sourceTree = "<group>"; };
 		2408E47D1C1B93D300A7B359 /* AAPL.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = AAPL.json; sourceTree = "<group>"; };
-		31A108168CDFC8774B3891F4 /* SwiftChart.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SwiftChart.podspec; path = ../SwiftChart.podspec; sourceTree = "<group>"; };
+		31A108168CDFC8774B3891F4 /* SwiftChart.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SwiftChart.podspec; path = ../SwiftChart.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		607FACD01AFB9204008FA782 /* SwiftChart_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftChart_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -35,6 +36,7 @@
 		AC7CAF090F76E359EA48CF70 /* Pods_SwiftChart_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SwiftChart_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9CECD7DA3EB977200516F46 /* Pods-SwiftChart_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SwiftChart_Example.release.xcconfig"; path = "Target Support Files/Pods-SwiftChart_Example/Pods-SwiftChart_Example.release.xcconfig"; sourceTree = "<group>"; };
 		F91CA5016DC91AA3DDBAE123 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		FA8A6ECA22F9CA230044EE6E /* Chart+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Chart+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
 				607FACDC1AFB9204008FA782 /* Images.xcassets */,
 				607FACD31AFB9204008FA782 /* Supporting Files */,
+				FA8A6ECA22F9CA230044EE6E /* Chart+Extension.swift */,
 			);
 			name = Example;
 			path = SwiftChart;
@@ -163,6 +166,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -246,6 +250,7 @@
 				2408E4791C1B8F6A00A7B359 /* BasicChartViewController.swift in Sources */,
 				2408E47C1C1B935500A7B359 /* StockChartViewController.swift in Sources */,
 				2408E47A1C1B8F6A00A7B359 /* TableViewController.swift in Sources */,
+				FA8A6ECB22F9CA230044EE6E /* Chart+Extension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

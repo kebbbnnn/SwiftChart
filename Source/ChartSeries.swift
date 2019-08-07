@@ -26,6 +26,8 @@ open class ChartSeries: Hashable {
       hasher.combine(ObjectIdentifier(self))
     }
   
+    open var position: Int?
+  
     /**
     The data used for the chart series.
     */

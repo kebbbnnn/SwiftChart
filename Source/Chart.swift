@@ -228,6 +228,8 @@ open class Chart: UIControl {
     // Minimum and maximum values represented in the chart
     fileprivate var min: ChartPoint!
     fileprivate var max: ChartPoint!
+  
+    fileprivate var position: Int = 0
 
     // Represent a set of points corresponding to a segment line on the chart.
     typealias ChartLineSegment = [ChartPoint]
@@ -262,10 +264,18 @@ open class Chart: UIControl {
         #endif
     }
 
+    fileprivate func generatePosition() -> Int {
+      if series.count % 2 == 0 {
+        position += 1
+      }
+      return position
+    }
+  
     /**
     Adds a chart series.
     */
     open func add(_ series: ChartSeries) {
+        series.position = generatePosition()
         self.series.append(series)
     }
 
@@ -274,6 +284,7 @@ open class Chart: UIControl {
     */
     open func add(_ series: [ChartSeries]) {
         for s in series {
+            s.position = generatePosition()
             add(s)
         }
     }
@@ -341,8 +352,9 @@ open class Chart: UIControl {
 //        layerStore.removeAll()
 
         // Draw content
-
-        for (index, series) in self.series.enumerated() {
+        let filteredSeries: [ChartSeries] = series.filter { $0.position == position }
+      
+        for (index, series) in filteredSeries.enumerated() {
 
             // Separate each line in multiple segments over and below the x axis
             let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
@@ -376,36 +388,57 @@ open class Chart: UIControl {
     // MARK: - Removes series line that are no longer existing
 
     fileprivate func removeDefunctLineLayers() {
+      var layers: [CAShapeLayer] = []
       
-      for layer in layerStore {
+      for (index, layer) in layerStore.enumerated().reversed() {
         if let tag: String = layer.name {
           let obj = self.series.first(where: { String($0.hashValue) == tag })
           if obj == nil {
-            // animate series removal
-            if animation.enabled {
-              
-              CATransaction.begin()
-              
-              let animateStrokeEnd = CABasicAnimation(keyPath: "strokeEnd")
-              animateStrokeEnd.duration = animation.duration
-              animateStrokeEnd.fromValue = 1
-              animateStrokeEnd.toValue = 0
-              
-              CATransaction.setCompletionBlock {
-                layer.removeFromSuperlayer()
-              }
-              
-              layer.add(animateStrokeEnd, forKey: "strokeEnd")
-              
-              CATransaction.commit()
-              
-            } else {
-              layer.removeFromSuperlayer()
-            }
+            layers.append(layer)
+            self.layerStore.remove(at: index)
           }
         }
       }
+      var sortedLayers: Array<[CAShapeLayer]> = Array<[CAShapeLayer]>(repeating: [], count: 2)
       
+      sortedLayers[0] = stride(from: 0, to: layers.count, by: 2).map { layers[$0] }.reversed() // EVEN INDEXES
+      sortedLayers[1] = stride(from: 1, to: layers.count, by: 2).map { layers[$0] }.reversed() // ODD INDEXES
+      
+      if !sortedLayers.isEmpty {
+        for sortedLayer in sortedLayers {
+          self.removeLineLayersWithAnimation(with: sortedLayer, duration: animation.duration / Double(sortedLayer.count))
+        }
+      }
+    }
+  
+    fileprivate func removeLineLayersWithAnimation(with layers: [CAShapeLayer]?, duration: CFTimeInterval) {
+      guard var layers = layers, !layers.isEmpty else { return }
+      
+      let layer: CAShapeLayer = layers.popLast()!
+      
+      // animate series removal
+      if animation.enabled {
+        
+        CATransaction.begin()
+        
+        let animateStrokeEnd = CABasicAnimation(keyPath: "strokeEnd")
+        animateStrokeEnd.duration = duration
+        animateStrokeEnd.fromValue = 1
+        animateStrokeEnd.toValue = 0
+        
+        CATransaction.setCompletionBlock {
+          layer.removeFromSuperlayer()
+          self.removeLineLayersWithAnimation(with: layers, duration: duration)
+        }
+        
+        layer.add(animateStrokeEnd, forKey: "strokeEnd")
+        
+        CATransaction.commit()
+        
+      } else {
+        layer.removeFromSuperlayer()
+        self.removeLineLayersWithAnimation(with: layers, duration: duration)
+      }
     }
   
     // MARK: - Scaling

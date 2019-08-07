@@ -35,10 +35,27 @@ class BasicChartViewController: UIViewController, ChartDelegate {
             (x: 9, y: 2.5)
           ]
           let series = ChartSeries(data: data)
-          series.area = true
+          series.color = ChartColors.blueColor()
+          //series.area = true
+          
+          let data2 = [
+            (x: 0, y: 2),
+            (x: 3, y: 1.5),
+            (x: 4, y: 2.5),
+            (x: 5, y: 2.9),
+            (x: 7, y: 3),
+            (x: 8, y: 2.5),
+            (x: 9, y: 3)
+          ]
+          let series2 = ChartSeries(data: data2)
+          series2.color = ChartColors.greenColor()
+          //series2.area = true
+          
           chart.xLabels = [0, 3, 6, 9, 12, 15, 18, 21, 24]
           chart.xLabelsFormatter = { String(Int(round($1))) + "h" }
-          chart.add(series)
+          
+          chart.add([series, series2])
+          chart.lineWidth = 5.0
 //          let series = ChartSeries(data: data)
 //          chart.add(series)
 
@@ -98,23 +115,35 @@ class BasicChartViewController: UIViewController, ChartDelegate {
     guard selectedChart == 0 else { return }
     
     if let chart = self.chart {
-      let lastSeries = chart.series.last
-      let lastPoint: (x: Double, y: Double) = (lastSeries?.data.last)!
+      let lastSeries = chart.getSeries(atIndex: chart.series.endIndex - 2)
+      let lastPoint: (x: Double, y: Double) = (lastSeries.data.last)!
       let newPoint: (x: Double, y: Double) = (x: lastPoint.x + 1, y: Double.random(in: 0..<3))
       let series = ChartSeries(data: [lastPoint, newPoint])
-      series.area = true
-      self.chart.add(series)
+      series.color = ChartColors.blueColor()
+      //series.area = true
+      
+      let lastSeries2 = chart.getSeries(atIndex: chart.series.endIndex - 1)
+      let lastPoint2: (x: Double, y: Double) = (lastSeries2.data.last)!
+      let newPoint2: (x: Double, y: Double) = (x: lastPoint2.x + 1, y: Double.random(in: 0..<3))
+      let series2 = ChartSeries(data: [lastPoint2, newPoint2])
+      series2.color = ChartColors.greenColor()
+      
+      self.chart.add([series, series2])
       DispatchQueue.main.async { [unowned self] in
         self.chart.setNeedsDisplay()
       }
     }
   }
   
+  
+  
   @IBAction func onRemoveDataTapped(_ sender: UIBarButtonItem) {
     guard selectedChart == 0 else { return }
     
     if let chart = self.chart {
-      self.chart.series.removeLast()
+      let endIndex = self.chart.series.endIndex - 1
+      let midIndex = endIndex / 2
+      self.chart.series.removeSubrange(midIndex...endIndex)
       DispatchQueue.main.async { [unowned self] in
         self.chart.setNeedsDisplay()
       }
