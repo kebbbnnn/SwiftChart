@@ -26,26 +26,26 @@ class BasicChartViewController: UIViewController, ChartDelegate {
             
             // Simple chart
           let data = [
-            (x: 0, y: 0),
-            (x: 3, y: 2.5),
-            (x: 4, y: 2),
-            (x: 5, y: 2.3),
-            (x: 7, y: 3),
-            (x: 8, y: 2.2),
-            (x: 9, y: 2.5)
+            (x: 0.0, y: 0.0)
+//            (x: 3, y: 2.5),
+//            (x: 4, y: 2),
+//            (x: 5, y: 2.3),
+//            (x: 7, y: 3),
+//            (x: 8, y: 2.2),
+//            (x: 9, y: 2.5)
           ]
           let series = ChartSeries(data: data)
           series.color = ChartColors.blueColor()
           //series.area = true
           
           let data2 = [
-            (x: 0, y: 2),
-            (x: 3, y: 1.5),
-            (x: 4, y: 2.5),
-            (x: 5, y: 2.9),
-            (x: 7, y: 3),
-            (x: 8, y: 2.5),
-            (x: 9, y: 3)
+            (x: 0.0, y: 2.0)
+//            (x: 3, y: 1.5),
+//            (x: 4, y: 2.5),
+//            (x: 5, y: 2.9),
+//            (x: 7, y: 3),
+//            (x: 8, y: 2.5),
+//            (x: 9, y: 3)
           ]
           let series2 = ChartSeries(data: data2)
           series2.color = ChartColors.greenColor()
@@ -115,22 +115,26 @@ class BasicChartViewController: UIViewController, ChartDelegate {
     guard selectedChart == 0 else { return }
     
     if let chart = self.chart {
-      let lastSeries = chart.getSeries(atIndex: chart.series.endIndex - 2)
-      let lastPoint: (x: Double, y: Double) = (lastSeries.data.last)!
-      let newPoint: (x: Double, y: Double) = (x: lastPoint.x + 1, y: Double.random(in: 0..<3))
-      let series = ChartSeries(data: [lastPoint, newPoint])
-      series.color = ChartColors.blueColor()
-      //series.area = true
-      
-      let lastSeries2 = chart.getSeries(atIndex: chart.series.endIndex - 1)
-      let lastPoint2: (x: Double, y: Double) = (lastSeries2.data.last)!
-      let newPoint2: (x: Double, y: Double) = (x: lastPoint2.x + 1, y: Double.random(in: 0..<3))
-      let series2 = ChartSeries(data: [lastPoint2, newPoint2])
-      series2.color = ChartColors.greenColor()
-      
-      self.chart.add([series, series2])
-      DispatchQueue.main.async { [unowned self] in
-        self.chart.setNeedsDisplay()
+      for _ in 1...4 {
+        let lastSeries = chart.getSeries(atIndex: chart.series.endIndex - 2)
+        let lastPoint: (x: Double, y: Double) = (lastSeries.data.last)!
+        let newPoint: (x: Double, y: Double) = (x: lastPoint.x + 1, y: Double.random(in: 0..<3))
+        let series = ChartSeries(data: [lastPoint, newPoint])
+        series.color = ChartColors.blueColor()
+        // series.area = true
+        
+        let lastSeries2 = chart.getSeries(atIndex: chart.series.endIndex - 1)
+        let lastPoint2: (x: Double, y: Double) = (lastSeries2.data.last)!
+        let newPoint2: (x: Double, y: Double) = (x: lastPoint2.x + 1, y: Double.random(in: 0..<3))
+        let series2 = ChartSeries(data: [lastPoint2, newPoint2])
+        series2.color = ChartColors.greenColor()
+        
+        self.chart.add([series, series2])
+        DispatchQueue.main.async { [unowned self] in
+          let count: Int = self.chart.series.count
+          self.chart.maxX = Double((count / 2) + 4)
+          self.chart.setNeedsDisplay()
+        }
       }
     }
   }

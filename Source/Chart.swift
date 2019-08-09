@@ -230,6 +230,8 @@ open class Chart: UIControl {
     fileprivate var max: ChartPoint!
   
     fileprivate var position: Int = 0
+  
+    fileprivate var lastPosition: Int = 0
 
     // Represent a set of points corresponding to a segment line on the chart.
     typealias ChartLineSegment = [ChartPoint]
@@ -352,27 +354,38 @@ open class Chart: UIControl {
 //        layerStore.removeAll()
 
         // Draw content
-        let filteredSeries: [ChartSeries] = series.filter { $0.position == position }
+        let filteredSeries: [ChartSeries] = series.filter { $0.position! > lastPosition }
       
-        for (index, series) in filteredSeries.enumerated() {
+        var sortedSeries: Array<[ChartSeries]> = Array<[ChartSeries]>(repeating: [], count: 2)
 
-            // Separate each line in multiple segments over and below the x axis
-            let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
+        sortedSeries[0] = stride(from: 0, to: filteredSeries.count, by: 2).map { filteredSeries[$0] }.reversed()
+        sortedSeries[1] = stride(from: 1, to: filteredSeries.count, by: 2).map { filteredSeries[$0] }.reversed()
 
-            segments.forEach({ segment in
-                let scaledXValues = scaleValuesOnXAxis( segment.map { $0.x } )
-                let scaledYValues = scaleValuesOnYAxis( segment.map { $0.y } )
-
-                let tag: String = String(series.hashValue)
-              
-                if series.line {
-                    drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
-                }
-                if series.area {
-                    drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
-                }
-            })
+        if !sortedSeries.isEmpty {
+          for series in sortedSeries {
+            self.addNewLineLayers(seriesArray: series, duration: animation.duration / Double(series.count))
+          }
         }
+//        for (index, series) in filteredSeries.enumerated() {
+//            self.lastPosition = series.position!
+//
+//            // Separate each line in multiple segments over and below the x axis
+//            let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
+//
+//            segments.forEach({ segment in
+//                let scaledXValues = scaleValuesOnXAxis( segment.map { $0.x } )
+//                let scaledYValues = scaleValuesOnYAxis( segment.map { $0.y } )
+//
+//                let tag: String = String(series.hashValue)
+//
+//                if series.line {
+//                    drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
+//                }
+//                if series.area {
+//                    drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
+//                }
+//            })
+//        }
 
         drawAxes()
 
@@ -385,6 +398,34 @@ open class Chart: UIControl {
 
     }
 
+    fileprivate func addNewLineLayers(seriesArray: [ChartSeries]?, duration: CFTimeInterval) {
+      guard var seriesArray = seriesArray, !seriesArray.isEmpty else { return }
+      
+      let series: ChartSeries = seriesArray.popLast()!
+      
+      self.lastPosition = series.position!
+      let index: Int = self.series.lastIndex(of: series)!
+      
+      // Separate each line in multiple segments over and below the x axis
+      let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
+      
+      segments.forEach({ segment in
+        let scaledXValues = scaleValuesOnXAxis( segment.map { $0.x } )
+        let scaledYValues = scaleValuesOnYAxis( segment.map { $0.y } )
+        
+        let tag: String = String(series.hashValue)
+        
+        if series.line {
+          drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag, duration: duration, block:{
+            self.addNewLineLayers(seriesArray: seriesArray, duration: duration)
+          })
+        }
+//        if series.area {
+//          drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
+//        }
+      })
+    }
+  
     // MARK: - Removes series line that are no longer existing
 
     fileprivate func removeDefunctLineLayers() {
@@ -410,6 +451,8 @@ open class Chart: UIControl {
         }
       }
     }
+  
+    /// MARK: - Iterate through array of layers to remove
   
     fileprivate func removeLineLayersWithAnimation(with layers: [CAShapeLayer]?, duration: CFTimeInterval) {
       guard var layers = layers, !layers.isEmpty else { return }
@@ -541,7 +584,7 @@ open class Chart: UIControl {
 
     // MARK: - Drawings
 
-  fileprivate func drawLine(_ xValues: [Double], yValues: [Double], seriesIndex: Int, tag: String) {
+  fileprivate func drawLine(_ xValues: [Double], yValues: [Double], seriesIndex: Int, tag: String, duration: CFTimeInterval, block: (() -> Void)?) {
         // YValues are "reverted" from top to bottom, so 'above' means <= level
         let isAboveZeroLine = yValues.max()! <= self.scaleValueOnYAxis(series[seriesIndex].colors.zeroLevel)
         let path = CGMutablePath()
@@ -571,11 +614,17 @@ open class Chart: UIControl {
       
         // animate line drawing
         if animation.enabled {
+          CATransaction.begin()
+          
           let animateStrokeEnd = CABasicAnimation(keyPath: "strokeEnd")
-          animateStrokeEnd.duration = animation.duration
+          animateStrokeEnd.duration = duration
           animateStrokeEnd.fromValue = 0
           animateStrokeEnd.toValue = 1
+          
+          CATransaction.setCompletionBlock(block)
           lineLayer.add(animateStrokeEnd, forKey: "strokeEnd")
+          
+          CATransaction.commit()
         }
     }
 
