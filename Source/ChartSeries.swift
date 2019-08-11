@@ -28,6 +28,8 @@ open class ChartSeries: Hashable {
   
     open var position: Int?
   
+    open var tag: String?
+  
     /**
     The data used for the chart series.
     */
