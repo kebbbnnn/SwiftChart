@@ -451,15 +451,15 @@ open class Chart: UIControl {
       sortedLayers[1] = stride(from: 1, to: layers.count, by: 2).map { layers[$0] }.reversed() // ODD INDEXES
       
       if !sortedLayers.isEmpty {
-        for sortedLayer in sortedLayers {
-          self.removeLineLayersWithAnimation(with: sortedLayer, duration: animation.duration / Double(sortedLayer.count))
+        for (index, sortedLayer) in sortedLayers.enumerated() {
+          self.removeLineLayersWithAnimation(with: sortedLayer, duration: animation.duration / Double(sortedLayer.count), sortedSeriesIndex: index)
         }
       }
     }
   
     /// MARK: - Iterate through array of layers to remove
   
-    fileprivate func removeLineLayersWithAnimation(with layers: [CAShapeLayer]?, duration: CFTimeInterval) {
+    fileprivate func removeLineLayersWithAnimation(with layers: [CAShapeLayer]?, duration: CFTimeInterval, sortedSeriesIndex: Int) {
       guard var layers = layers, !layers.isEmpty else { return }
       
       let layer: CAShapeLayer = layers.popLast()!
@@ -476,7 +476,10 @@ open class Chart: UIControl {
         
         CATransaction.setCompletionBlock {
           layer.removeFromSuperlayer()
-          self.removeLineLayersWithAnimation(with: layers, duration: duration)
+          self.removeLineLayersWithAnimation(with: layers, duration: duration, sortedSeriesIndex: sortedSeriesIndex)
+          if layers.count == 0, sortedSeriesIndex == 0, self.animationCompletion != nil {
+            self.animationCompletion!()
+          }
         }
         
         layer.add(animateStrokeEnd, forKey: "strokeEnd")
@@ -485,7 +488,7 @@ open class Chart: UIControl {
         
       } else {
         layer.removeFromSuperlayer()
-        self.removeLineLayersWithAnimation(with: layers, duration: duration)
+        self.removeLineLayersWithAnimation(with: layers, duration: duration, sortedSeriesIndex: sortedSeriesIndex)
       }
     }
   
