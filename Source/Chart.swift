@@ -212,6 +212,8 @@ open class Chart: UIControl {
   
     public var animation: ChartAnimation = ChartAnimation()
   
+    public var animationCompletion: (() -> Void)?
+  
     /**
     Alpha component for the area color.
     */
@@ -362,8 +364,8 @@ open class Chart: UIControl {
         sortedSeries[1] = stride(from: 1, to: filteredSeries.count, by: 2).map { filteredSeries[$0] }.reversed()
 
         if !sortedSeries.isEmpty {
-          for series in sortedSeries {
-            self.addNewLineLayers(seriesArray: series, duration: animation.duration / Double(series.count))
+          for (index, series) in sortedSeries.enumerated() {
+            self.addNewLineLayers(seriesArray: series, duration: animation.duration / Double(series.count), sortedSeriesIndex: index)
           }
         }
 //        for (index, series) in filteredSeries.enumerated() {
@@ -398,14 +400,14 @@ open class Chart: UIControl {
 
     }
 
-    fileprivate func addNewLineLayers(seriesArray: [ChartSeries]?, duration: CFTimeInterval) {
+  fileprivate func addNewLineLayers(seriesArray: [ChartSeries]?, duration: CFTimeInterval, sortedSeriesIndex: Int) {
       guard var seriesArray = seriesArray, !seriesArray.isEmpty else { return }
       
       let series: ChartSeries = seriesArray.popLast()!
       
       self.lastPosition = series.position!
       let index: Int = self.series.lastIndex(of: series)!
-      
+    
       // Separate each line in multiple segments over and below the x axis
       let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
       
@@ -417,7 +419,10 @@ open class Chart: UIControl {
         
         if series.line {
           drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag, duration: duration, block:{
-            self.addNewLineLayers(seriesArray: seriesArray, duration: duration)
+            self.addNewLineLayers(seriesArray: seriesArray, duration: duration, sortedSeriesIndex: sortedSeriesIndex)
+            if seriesArray.count == 0, sortedSeriesIndex == 1, self.animationCompletion != nil {
+              self.animationCompletion!()
+            }
           })
         }
 //        if series.area {
