@@ -214,6 +214,8 @@ open class Chart: UIControl {
   
     public var animationCompletion: (() -> Void)?
   
+    public var removeAnimationCompletion: (() -> Void)?
+  
     /**
     Alpha component for the area color.
     */
@@ -477,8 +479,8 @@ open class Chart: UIControl {
         CATransaction.setCompletionBlock {
           layer.removeFromSuperlayer()
           self.removeLineLayersWithAnimation(with: layers, duration: duration, sortedSeriesIndex: sortedSeriesIndex)
-          if layers.count == 0, sortedSeriesIndex == 0, self.animationCompletion != nil {
-            self.animationCompletion!()
+          if layers.count == 0, sortedSeriesIndex == 0, self.removeAnimationCompletion != nil {
+            self.removeAnimationCompletion!()
           }
         }
         
