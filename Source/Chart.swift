@@ -216,6 +216,8 @@ open class Chart: UIControl {
   
     public var removeAnimationCompletion: (() -> Void)?
   
+    public var showCircle: Bool = false
+  
     /**
     Alpha component for the area color.
     */
@@ -225,6 +227,7 @@ open class Chart: UIControl {
 
     fileprivate var highlightShapeLayer: CAShapeLayer!
     fileprivate var layerStore: [CAShapeLayer] = []
+    fileprivate var circleLayerStore: [CAShapeLayer] = []
 
     fileprivate var drawingHeight: CGFloat!
     fileprivate var drawingWidth: CGFloat!
@@ -466,6 +469,11 @@ open class Chart: UIControl {
       
       let layer: CAShapeLayer = layers.popLast()!
       
+      if showCircle {
+        let circleLayer: CAShapeLayer = circleLayerStore.popLast()!
+        circleLayer.removeFromSuperlayer()
+      }
+      
       // animate series removal
       if animation.enabled {
         
@@ -621,7 +629,7 @@ open class Chart: UIControl {
         self.layer.addSublayer(lineLayer)
 
         layerStore.append(lineLayer)
-      
+    
         // animate line drawing
         if animation.enabled {
           CATransaction.begin()
@@ -631,7 +639,32 @@ open class Chart: UIControl {
           animateStrokeEnd.fromValue = 0
           animateStrokeEnd.toValue = 1
           
-          CATransaction.setCompletionBlock(block)
+          
+          CATransaction.setCompletionBlock { [unowned self] in
+            if self.showCircle, isAboveZeroLine, xValues.count > 1, yValues.count > 1 {
+              let circlePath = UIBezierPath(
+                arcCenter: CGPoint(x: xValues.last!, y: yValues.last!),
+                radius: 4.0,
+                startAngle: 0.0,
+                endAngle: CGFloat(Double.pi * 2),
+                clockwise: true
+              )
+              
+              let shapeLayer = CAShapeLayer()
+              //shapeLayer.name = "circle-\(tag)"
+              shapeLayer.path = circlePath.cgPath
+              
+              shapeLayer.fillColor = UIColor.white.cgColor
+              shapeLayer.strokeColor = self.series[seriesIndex].colors.above.cgColor
+              shapeLayer.lineWidth = 4.0
+              
+              self.layer.addSublayer(shapeLayer)
+              
+              self.circleLayerStore.append(shapeLayer)
+            }
+            
+            block!()
+          }
           lineLayer.add(animateStrokeEnd, forKey: "strokeEnd")
           
           CATransaction.commit()
