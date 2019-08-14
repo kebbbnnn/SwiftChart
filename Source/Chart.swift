@@ -405,35 +405,35 @@ open class Chart: UIControl {
 
     }
 
-  fileprivate func addNewLineLayers(seriesArray: [ChartSeries]?, duration: CFTimeInterval, sortedSeriesIndex: Int) {
+    fileprivate func addNewLineLayers(seriesArray: [ChartSeries]?, duration: CFTimeInterval, sortedSeriesIndex: Int) {
       guard var seriesArray = seriesArray, !seriesArray.isEmpty else { return }
       
       let series: ChartSeries = seriesArray.popLast()!
       
       self.lastPosition = series.position!
-      let index: Int = self.series.lastIndex(of: series)!
-    
-      // Separate each line in multiple segments over and below the x axis
-      let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
-      
-      segments.forEach({ segment in
-        let scaledXValues = scaleValuesOnXAxis( segment.map { $0.x } )
-        let scaledYValues = scaleValuesOnYAxis( segment.map { $0.y } )
+      if let index: Int = self.series.lastIndex(of: series) {
+        // Separate each line in multiple segments over and below the x axis
+        let segments = Chart.segmentLine(series.data as ChartLineSegment, zeroLevel: series.colors.zeroLevel)
         
-        let tag: String = String(series.hashValue)
-        
-        if series.line {
-          drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag, duration: duration, block:{
-            self.addNewLineLayers(seriesArray: seriesArray, duration: duration, sortedSeriesIndex: sortedSeriesIndex)
-            if seriesArray.count == 0, sortedSeriesIndex == 1, self.animationCompletion != nil {
-              self.animationCompletion!()
-            }
-          })
+        segments.forEach { segment in
+          let scaledXValues = scaleValuesOnXAxis(segment.map { $0.x })
+          let scaledYValues = scaleValuesOnYAxis(segment.map { $0.y })
+          
+          let tag: String = String(series.hashValue)
+          
+          if series.line {
+            drawLine(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag, duration: duration, block: {
+              self.addNewLineLayers(seriesArray: seriesArray, duration: duration, sortedSeriesIndex: sortedSeriesIndex)
+              if seriesArray.count == 0, sortedSeriesIndex == 1, self.animationCompletion != nil {
+                self.animationCompletion!()
+              }
+            })
+          }
+          //        if series.area {
+          //          drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
+          //        }
         }
-//        if series.area {
-//          drawArea(scaledXValues, yValues: scaledYValues, seriesIndex: index, tag: tag)
-//        }
-      })
+      }
     }
   
     // MARK: - Removes series line that are no longer existing
