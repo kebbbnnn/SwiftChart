@@ -469,7 +469,7 @@ open class Chart: UIControl {
       
       let layer: CAShapeLayer = layers.popLast()!
       
-      if showCircle {
+      if showCircle, !circleLayerStore.isEmpty {
         let circleLayer: CAShapeLayer = circleLayerStore.popLast()!
         circleLayer.removeFromSuperlayer()
       }
