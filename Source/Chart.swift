@@ -218,6 +218,8 @@ open class Chart: UIControl {
   
     public var showCircle: Bool = false
   
+    public var showAxis: Bool = true
+  
     /**
     Alpha component for the area color.
     */
@@ -713,15 +715,17 @@ open class Chart: UIControl {
         context.setStrokeColor(axesColor.cgColor)
         context.setLineWidth(0.5)
 
-        // horizontal axis at the bottom
-        context.move(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
-        context.strokePath()
-
-        // horizontal axis at the top
-        context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
-        context.strokePath()
+        if showAxis {
+          // horizontal axis at the bottom
+          context.move(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
+          context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
+          context.strokePath()
+          
+          // horizontal axis at the top
+          context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
+          context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
+          context.strokePath()
+        }
 
         // horizontal axis when y = 0
         if min.y < 0 && max.y > 0 {
@@ -731,15 +735,17 @@ open class Chart: UIControl {
             context.strokePath()
         }
 
-        // vertical axis on the left
-        context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
-        context.addLine(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
-        context.strokePath()
-
-        // vertical axis on the right
-        context.move(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
-        context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
-        context.strokePath()
+        if showAxis {
+          // vertical axis on the left
+          context.move(to: CGPoint(x: CGFloat(0), y: CGFloat(0)))
+          context.addLine(to: CGPoint(x: CGFloat(0), y: drawingHeight + topInset))
+          context.strokePath()
+          
+          // vertical axis on the right
+          context.move(to: CGPoint(x: CGFloat(drawingWidth), y: CGFloat(0)))
+          context.addLine(to: CGPoint(x: CGFloat(drawingWidth), y: drawingHeight + topInset))
+          context.strokePath()
+        }
     }
 
     fileprivate func drawLabelsAndGridOnXAxis() {
