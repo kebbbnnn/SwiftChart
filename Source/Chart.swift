@@ -610,10 +610,10 @@ open class Chart: UIControl {
         // YValues are "reverted" from top to bottom, so 'above' means <= level
         let isAboveZeroLine = yValues.max()! <= self.scaleValueOnYAxis(series[seriesIndex].colors.zeroLevel)
         let path = CGMutablePath()
-        path.move(to: CGPoint(x: CGFloat(xValues.first!), y: CGFloat(yValues.first!)))
+        path.move(to: CGPoint(x: CGFloat(xValues.first! + 2.9), y: CGFloat(yValues.first! + 0.5)))
         for i in 1..<yValues.count {
             let y = yValues[i]
-            path.addLine(to: CGPoint(x: CGFloat(xValues[i]), y: CGFloat(y)))
+            path.addLine(to: CGPoint(x: CGFloat(xValues[i] - 2.9), y: CGFloat(y - 1.5)))
         }
 
         let lineLayer = CAShapeLayer()
@@ -648,7 +648,7 @@ open class Chart: UIControl {
             if self.showCircle, isAboveZeroLine, xValues.count > 1, yValues.count > 1 {
               let circlePath = UIBezierPath(
                 arcCenter: CGPoint(x: xValues.last!, y: yValues.last!),
-                radius: 4.0,
+                radius: 5.0,
                 startAngle: 0.0,
                 endAngle: CGFloat(Double.pi * 2),
                 clockwise: true
@@ -660,7 +660,7 @@ open class Chart: UIControl {
               
               shapeLayer.fillColor = self.circleFillColor.cgColor
               shapeLayer.strokeColor = self.series[seriesIndex].colors.above.cgColor
-              shapeLayer.lineWidth = 4.0
+              shapeLayer.lineWidth = 3.0
               
               self.layer.addSublayer(shapeLayer)
               
