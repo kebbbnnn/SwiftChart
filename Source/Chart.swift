@@ -218,6 +218,8 @@ open class Chart: UIControl {
   
     public var showCircle: Bool = false
   
+    public var circleFillColor: UIColor = .white
+  
     public var showAxis: Bool = true
   
     /**
@@ -656,7 +658,7 @@ open class Chart: UIControl {
               //shapeLayer.name = "circle-\(tag)"
               shapeLayer.path = circlePath.cgPath
               
-              shapeLayer.fillColor = UIColor.white.cgColor
+              shapeLayer.fillColor = self.circleFillColor.cgColor
               shapeLayer.strokeColor = self.series[seriesIndex].colors.above.cgColor
               shapeLayer.lineWidth = 4.0
               
